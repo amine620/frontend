@@ -3,13 +3,15 @@ import axios from "axios"
 import Blog from './Blog';
 
 export default function Blogs() {
-    const [blogs, setblogs] = useState([])
+    const [articles, setarticles] = useState([])
+    const [form,setform]=useState({})
+    
 
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/all')
             .then(response => {
                 console.log(response.data.articles);
-                setblogs(response.data.articles)
+                setarticles(response.data.articles)
             })
     }, []);
 
@@ -17,24 +19,35 @@ export default function Blogs() {
         axios.delete(`http://127.0.0.1:8000/api/destroy/${id}`)
         .then((res)=>{
             console.log(res);
-            let result=blogs.filter((blog)=>blog.id!==id)
-            setblogs(result)
-        })
+            let result=articles.filter((article)=>article.id!==id)
+            setarticles(result)
+        })  
+    }
 
+    const handleChange=(e)=>{
+         setform({
+             ...form,
+             [e.target.name]:e.target.value
+         })
+    }
 
-        
+    const sendData=()=>{
+       axios.post("http://127.0.0.1:8000/api/store",form)
+       .then(res=>{
+           setarticles([ res.data.article , ...articles])  
+       })
     }
     return (
 
         <>
             <div className="container mt-5">
                 <div classname="form-group">
-                    <input type="text" className="form-control mt-2" placeholder="title" />
+                    <input onChange={handleChange} name='title' type="text" className="form-control mt-2" placeholder="title" />
                     <div className="form-floating">
-                        <textarea className="form-control mt-2" placeholder="content" id="floatingTextarea2" style={{ height: 100 }} defaultValue={""} />
+                        <textarea onChange={handleChange} name='description' className="form-control mt-2" placeholder="content" id="floatingTextarea2" style={{ height: 100 }} defaultValue={""} />
                         <label htmlFor="floatingTextarea2">content</label>
                     </div>
-                    <button  className="btn btn-primary form-control mt-2">save</button>
+                    <button onClick={sendData}  className="btn btn-primary form-control mt-2">save</button>
                 </div>
 
             </div>
@@ -43,10 +56,10 @@ export default function Blogs() {
                 <div className="row">
 
                     {
-                        blogs.map((blog) => (
+                        articles.map((article) => (
                             <div className="card col-md-4 mt-2 ">
-                                <Blog data={blog} />
-                                <button onClick={()=>remove(blog.id)} className='btn btn-danger'>delete</button>
+                                <Blog data={article} />
+                                <button onClick={()=>remove(article.id)} className='btn btn-danger'>delete</button>
                             </div>
                         ))
                     }
