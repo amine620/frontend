@@ -5,6 +5,7 @@ import Blog from './Blog';
 export default function Blogs() {
     const [articles, setarticles] = useState([])
     const [form,setform]=useState({})
+    const [errors,seterrors]=useState({})
     
 
     useEffect(() => {
@@ -34,8 +35,13 @@ export default function Blogs() {
     const sendData=()=>{
        axios.post("http://127.0.0.1:8000/api/store",form)
        .then(res=>{
+           seterrors({})
            setarticles([ res.data.article , ...articles])  
        })
+       .catch(error=>{
+           seterrors(error.response.data.errors)
+       })
+       
     }
     return (
 
@@ -43,9 +49,15 @@ export default function Blogs() {
             <div className="container mt-5">
                 <div classname="form-group">
                     <input onChange={handleChange} name='title' type="text" className="form-control mt-2" placeholder="title" />
+                    {
+                        errors ? (<span className='text-danger'>{errors.title}</span>) : ""
+                    }
                     <div className="form-floating">
                         <textarea onChange={handleChange} name='description' className="form-control mt-2" placeholder="content" id="floatingTextarea2" style={{ height: 100 }} defaultValue={""} />
                         <label htmlFor="floatingTextarea2">content</label>
+                        {
+                        errors ? (<span className='text-danger'>{errors.description}</span>) : ""
+                       }
                     </div>
                     <button onClick={sendData}  className="btn btn-primary form-control mt-2">save</button>
                 </div>
